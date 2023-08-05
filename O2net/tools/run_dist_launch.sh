@@ -20,16 +20,8 @@ NODE_RANK=${NODE_RANK:-0}
 
 let "NNODES=GPUS/GPUS_PER_NODE"
 
-# python ./tools/launch.py \
-#     --nnodes ${NNODES} \
-#     --node_rank ${NODE_RANK} \
-#     --master_addr ${MASTER_ADDR} \
-#     --master_port ${MASTER_PORT} \
-#     --nproc_per_node ${GPUS_PER_NODE} \
-#     ${RUN_COMMAND}
-
 python ./tools/launch.py \
-    --nnodes 2 \
+    --nnodes ${NNODES} \
     --node_rank ${NODE_RANK} \
     --master_addr ${MASTER_ADDR} \
     --master_port ${MASTER_PORT} \

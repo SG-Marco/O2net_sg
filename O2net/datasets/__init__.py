@@ -10,8 +10,8 @@
 import torch.utils.data
 from .torchvision_datasets import CocoDetection
 
-from .DA_coco import build_city2foggy_cocostyle, 
-from .DA_coco import build_city2foggy_cocostyle_source, 
+from .DA_coco import build_city2foggy_cocostyle
+from .DA_coco import build_city2foggy_cocostyle_source
 
 def get_coco_api_from_dataset(dataset):
     for _ in range(10):
