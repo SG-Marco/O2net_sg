@@ -1,0 +1,3 @@
+[submodule "O2net"]
+	path = O2net
+	url = https://github.com/BIT-DA/O2net.git
