@@ -234,7 +234,6 @@ def convert_cityscapes_instance_only(
 
 if __name__ == '__main__':
     args = parse_args()
-    print(111)
     if args.dataset == "cityscapes_instance_only":
         convert_cityscapes_instance_only(args.datadir, args.outdir)
     elif args.dataset == "cocostuff":
