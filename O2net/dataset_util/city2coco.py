@@ -35,36 +35,20 @@ import cityscapesScripts.cityscapesscripts.evaluation.instances2dict_with_polygo
 
 
 
-# def parse_args():
-#     parser = argparse.ArgumentParser(description='Convert dataset')
-#     parser.add_argument(
-#         '--dataset', help="cocostuff, cityscapes", default=None, type=str)
-#     parser.add_argument(
-#         '--outdir', help="output dir for json files", default=None, type=str)
-#     parser.add_argument(
-#         '--datadir', help="data dir for annotations to be converted",
-#         default=None, type=str)
-#     if len(sys.argv) == 1:
-#         parser.print_help()
-#         sys.exit(1)
-    # return parser.parse_args()
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert dataset')
     parser.add_argument(
         '--dataset', help="cocostuff, cityscapes", default=None, type=str)
     parser.add_argument(
-        '--outdir', help="/Users/sg/Desktop/workspace1/Yonsei_AI/O2net/dataset/test_output_dir", default=None, type=str)
+        '--outdir', help="output dir for json files", default=None, type=str)
     parser.add_argument(
-        '--datadir', help="/Users/sg/Desktop/workspace1/Yonsei_AI/O2net/dataset/test_data_dir",
+        '--datadir', help="data dir for annotations to be converted",
         default=None, type=str)
     if len(sys.argv) == 1:
-        print(sys.argv)
         parser.print_help()
         sys.exit(1)
-    print(sys.argv)
     return parser.parse_args()
+
 
 
 def poly_to_box(poly):
