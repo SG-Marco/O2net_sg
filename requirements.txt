@@ -4,3 +4,7 @@ cython
 scipy
 cityscapesScripts
 kornia
+--upgrade pip
+-U pip ipp-devel
+git+https://github.com/pytorch/accimage
+git+https://github.com/cocodataset/panopticapi.git
