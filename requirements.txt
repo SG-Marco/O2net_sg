@@ -4,6 +4,5 @@ cython
 scipy
 cityscapesScripts
 kornia
--U pip ipp-devel
 git+https://github.com/pytorch/accimage
 git+https://github.com/cocodataset/panopticapi.git
