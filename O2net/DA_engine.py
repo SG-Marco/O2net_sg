@@ -60,6 +60,36 @@ def swd(source_features, target_features, M=256):
     loss = (source_proj - target_proj).pow(2).sum() / M / batch_size
     return loss 
 
+
+def l2_norm(source_features, target_features):
+    """
+    Calculates the L2 norm of two distributions.
+
+    Args:
+      source_features: The feature of the source distribution.
+      target_features: The feature of the target distribution.  
+    Returns:
+      A float.
+    """
+
+    # Calculate the mean of the source distribution.
+    source_mean = np.mean(source_features, axis=0)
+
+    # Calculate the mean of the target distribution.
+    target_mean = np.mean(target_features, axis=0)  
+    # Calculate the variance of the source distribution.
+    source_variance = np.var(source_features, axis=0)
+
+    # Calculate the variance of the target distribution.
+    target_variance = np.var(target_features, axis=0)
+
+    # Calculate the L2 norm of the two distributions.
+    l2_norm = np.sqrt((source_mean - target_mean) ** 2 + source_variance + target_variance)
+
+    print(l2_norm, "*******************************************")
+    return l2_norm
+
+
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module, args,
         data_loader_src: Iterable, data_loader_tgt: Iterable, optimizer: torch.optim.Optimizer,
                     device: torch.device, epoch: int, max_norm: float = 0):
@@ -165,8 +195,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module, args,
             loss_da += DA_img_loss
             loss_global_da += global_DA_img_loss
         loss_dict["loss_da"] = args.instance_loss_coef * loss_da + loss_global_da
-        loss_dict["loss_wasserstein"] = swd(hs_src[-1], hs_tgt[-1])
-        
+        # loss_dict["loss_wasserstein"] = swd(hs_src[-1], hs_tgt[-1])
+        loss_dict["loss_l2_norm"] = swd(hs_src[-1], hs_tgt[-1])
+
         losses = sum(loss_dict[k] * weight_dict[k]
                      for k in loss_dict.keys() if k in weight_dict)
        
