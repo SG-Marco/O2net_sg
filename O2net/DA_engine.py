@@ -62,31 +62,8 @@ def swd(source_features, target_features, M=256):
 
 
 def l2_norm(source_features, target_features):
-    """
-    Calculates the L2 norm of two distributions.
+    l2_norm = torch.sqrt((source_features - target_features) ** 2).sum() / 256 ** 2 # divide by square of feature dim
 
-    Args:
-      source_features: The feature of the source distribution.
-      target_features: The feature of the target distribution.  
-    Returns:
-      A float.
-    """
-
-    # Calculate the mean of the source distribution.
-    source_mean = np.mean(source_features, axis=0)
-
-    # Calculate the mean of the target distribution.
-    target_mean = np.mean(target_features, axis=0)  
-    # Calculate the variance of the source distribution.
-    source_variance = np.var(source_features, axis=0)
-
-    # Calculate the variance of the target distribution.
-    target_variance = np.var(target_features, axis=0)
-
-    # Calculate the L2 norm of the two distributions.
-    l2_norm = np.sqrt((source_mean - target_mean) ** 2 + source_variance + target_variance)
-
-    print(l2_norm, "*******************************************")
     return l2_norm
 
 
