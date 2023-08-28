@@ -62,7 +62,8 @@ def swd(source_features, target_features, M=256):
 
 
 def l2_norm(source_features, target_features):
-    l2_norm = torch.sqrt((source_features - target_features) ** 2).sum() / 256 ** 2 # divide by square of feature dim
+    # l2_norm = torch.sqrt(((source_features - target_features) ** 2).sum()) / 256 ** 2 # divide by square of feature dim
+    l2_norm = ((source_features - target_features) ** 2).sum() / 256 ** 2 # divide by square of feature dim
 
     return l2_norm
 
@@ -97,6 +98,15 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module, args,
             samples_tgt, need_prop_tgt)
          
     
+
+        # if torch.isnan(outputs_src["pred_logits"]).any() or torch.isnan(outputs_src["pred_boxes"]).any():
+        #     outputs_src["pred_logits"] = torch.nan_to_num(outputs_src["pred_logits"], nan = 1e-4)
+        #     outputs_src["pred_boxes"] = torch.nan_to_num(outputs_src["pred_boxes"], nan = 1e-4)
+        #     for output in outputs_src["aux_outputs"]:
+        #         output["pred_logits"] = torch.nan_to_num(output["pred_logits"], nan = 1e-4)
+        #         output["pred_boxes"] = torch.nan_to_num(output["pred_boxes"], nan = 1e-4)
+
+
         pseudo = None
         out_logits_tgt = outputs_tgt["pred_logits"]
         out_bbox_tgt = outputs_tgt["pred_boxes"]
