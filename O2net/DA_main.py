@@ -134,6 +134,9 @@ def get_args_parser():
     parser.add_argument('--num_workers', default=2, type=int)
     parser.add_argument('--cache_mode', default=False, action='store_true', help='whether to cache images on memory')
     parser.add_argument('--transform', type=str, default='make_coco_transforms')
+
+    # tail name tag of saving files
+    parser.add_argument('--name_tag', default='', help='tail name tag of file. ex) log_name_tag.txt')
     return parser
 
 def to_cuda(targets, device):
@@ -156,6 +159,7 @@ def main(args):
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
+    name_tag = args.name_tag
 
     model, criterion, postprocessors = DA_build_model(args)
     model.to(device)
