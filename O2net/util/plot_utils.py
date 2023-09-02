@@ -14,6 +14,7 @@ import torch
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
 from pathlib import Path, PurePath
 
@@ -48,7 +49,8 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     for i, dir in enumerate(logs):
         if not isinstance(dir, PurePath):
             raise ValueError(f"{func_name} - non-Path object in logs argument of {type(dir)}: \n{dir}")
-        if dir.exists():
+        # if dir.exists():
+        if os.path.exists(dir):
             continue
         raise ValueError(f"{func_name} - invalid directory in logs argument:\n{dir}")
 
