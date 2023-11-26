@@ -31,7 +31,7 @@ import torchvision.transforms.functional as F
 from torchvision.transforms.functional import to_pil_image, to_tensor
 import datasets.functional_tensor as F_t
 from PIL import Image
-import accimage
+# import accimage
 
 import random
 
@@ -539,7 +539,8 @@ def gaussian_blur_1(img, kernel_size, sigma):
 
 
 def _is_pil_image(img):
-    if accimage is not None:
-        return isinstance(img, (Image.Image, accimage.Image))
-    else:
-        return isinstance(img, Image.Image)
+    # if accimage is not None:
+    #     return isinstance(img, (Image.Image, accimage.Image))
+    # else:
+    #     return isinstance(img, Image.Image)
+    return isinstance(img, Image.Image)
