@@ -24,6 +24,9 @@ from datasets.data_prefetcher import data_prefetcher
 import torch.nn.functional as F
 import numpy as np
 import time
+import json
+from pathlib import Path
+
 
 
 def box_to_mask(boxes, size):
@@ -274,6 +277,26 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
                 results, outputs, orig_target_sizes, target_sizes)
         res = {target['image_id'].item(): output for target,
                output in zip(targets, results)} 
+        
+        print(res)
+
+        output_dir = Path("/content/O2net_sg/O2net/test")
+        name_tag = "res_print"
+
+        res_for_json = res.copy()
+     
+        for i in range(len(res_for_json)):
+            res_for_json[i]['scores'] = res_for_json[i]['scores'].cpu().numpy().tolist()
+            res_for_json[i]['labels'] = res_for_json[i]['labels'].cpu().numpy().tolist()
+            res_for_json[i]['boxes'] = res_for_json[i]['boxes'].cpu().numpy().tolist()
+            print(type(res_for_json[i]['boxes']))
+            print(res_for_json[i]['boxes'])
+       
+
+        with (output_dir / f"log_{name_tag}.json").open("a") as f:
+            f.write(json.dumps(res_for_json) + "\n")
+
+
      
         if coco_evaluator is not None:
             coco_evaluator.update(res)
