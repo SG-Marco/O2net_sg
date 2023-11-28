@@ -166,33 +166,15 @@ def main(args):
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    dataset_train_src = DA_build_dataset(image_set='train_src', args=args)
-    dataset_train_tgt = DA_build_dataset(image_set='train_tgt', args=args)
     dataset_val = DA_build_dataset(image_set='val', args=args)
     if args.distributed:
         if args.cache_mode:
-            sampler_train_src = samplers.NodeDistributedSampler(dataset_train_src)
-            sampler_train_tgt = samplers.NodeDistributedSampler(dataset_train_tgt)
             sampler_val = samplers.NodeDistributedSampler(dataset_val, shuffle=False)
         else:
-            sampler_train_src = samplers.DistributedSampler(dataset_train_src)
-            sampler_train_tgt = samplers.DistributedSampler(dataset_train_tgt)
             sampler_val = samplers.DistributedSampler(dataset_val, shuffle=False)
     else:
-        sampler_train_src = torch.utils.data.RandomSampler(dataset_train_src)
-        sampler_train_tgt = torch.utils.data.RandomSampler(dataset_train_tgt)
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
 
-    batch_sampler_train_src = torch.utils.data.BatchSampler(
-        sampler_train_src, args.batch_size, drop_last=True)
-    batch_sampler_train_tgt = torch.utils.data.BatchSampler(
-        sampler_train_tgt, args.batch_size, drop_last=True)
-    data_loader_train_src = DataLoader(dataset_train_src, batch_sampler=batch_sampler_train_src,
-                                   collate_fn=utils.collate_fn, num_workers=args.num_workers,
-                                   pin_memory=True)
-    data_loader_train_tgt = DataLoader(dataset_train_tgt, batch_sampler=batch_sampler_train_tgt,
-                                   collate_fn=utils.collate_fn, num_workers=args.num_workers,
-                                   pin_memory=True)
     data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
                                  drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers,
                                  pin_memory=True)
@@ -301,11 +283,7 @@ def main(args):
     pseudo_labels = None
     
     for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            sampler_train_src.set_epoch(epoch)
-            sampler_train_tgt.set_epoch(epoch)
         
-
         lr_scheduler.step()
         
         test_stats, coco_evaluator = evaluate(
