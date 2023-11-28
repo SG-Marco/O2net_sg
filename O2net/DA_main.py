@@ -137,6 +137,7 @@ def get_args_parser():
 
     # tail name tag of saving files
     parser.add_argument('--name_tag', default='', help='tail name tag of file. ex) log_name_tag.txt')
+    # parser.add_argument('--image_path', default='')
     return parser
 
 def to_cuda(targets, device):
@@ -146,11 +147,9 @@ def to_cuda(targets, device):
 
 def main(args):
     utils.init_distributed_mode(args)
-    print("git:\n  {}\n".format(utils.get_sha()))
 
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
-    print(args)
 
     device = torch.device(args.device)
 
@@ -166,7 +165,6 @@ def main(args):
 
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('number of params:', n_parameters)
 
     dataset_train_src = DA_build_dataset(image_set='train_src', args=args)
     dataset_train_tgt = DA_build_dataset(image_set='train_tgt', args=args)
@@ -186,9 +184,9 @@ def main(args):
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
 
     batch_sampler_train_src = torch.utils.data.BatchSampler(
-        sampler_train_src, args.batch_size//2, drop_last=True)
+        sampler_train_src, args.batch_size, drop_last=True)
     batch_sampler_train_tgt = torch.utils.data.BatchSampler(
-        sampler_train_tgt, args.batch_size//2, drop_last=True)
+        sampler_train_tgt, args.batch_size, drop_last=True)
     data_loader_train_src = DataLoader(dataset_train_src, batch_sampler=batch_sampler_train_src,
                                    collate_fn=utils.collate_fn, num_workers=args.num_workers,
                                    pin_memory=True)
@@ -315,52 +313,12 @@ def main(args):
             sampler_train_src.set_epoch(epoch)
             sampler_train_tgt.set_epoch(epoch)
         
-        train_stats = train_one_epoch(
-            model, criterion, args, data_loader_train_src, data_loader_train_tgt, optimizer, device, epoch, args.clip_max_norm)
 
         lr_scheduler.step()
-        if args.output_dir:
-            checkpoint_paths = [output_dir / f'checkpoint_{name_tag}.pth']
-            # extra checkpoint before LR drop and every 5 epochs
-            if (epoch + 1) % args.lr_drop == 0 or (epoch + 1) % 5 == 0:
-                checkpoint_paths.append(output_dir / f'checkpoint_{name_tag}_epoch_{epoch}.pth')
-            for checkpoint_path in checkpoint_paths:
-                utils.save_on_master({
-                    'model': model_without_ddp.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'lr_scheduler': lr_scheduler.state_dict(),
-                    'epoch': epoch,
-                    'args': args,
-                }, checkpoint_path)
-
         
         test_stats, coco_evaluator = evaluate(
                 model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir)
         
-        
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-                     **{f'test_{k}': v for k, v in test_stats.items()},
-                     'epoch': epoch,
-                     'n_parameters': n_parameters}
-
-        if args.output_dir and utils.is_main_process():
-            with (output_dir / f"log_{name_tag}.txt").open("a") as f:
-                f.write(json.dumps(log_stats) + "\n")
-
-            # for evaluation logs
-            if coco_evaluator is not None:
-                (output_dir / f'eval_{name_tag}').mkdir(exist_ok=True)
-                if "bbox" in coco_evaluator.coco_eval:
-                    filenames = [f'latest_{name_tag}.pth']
-                    if epoch % 50 == 0:
-                        filenames.append(f'every50_{name_tag}_epoch{epoch}.pth')
-                    for name in filenames:
-                        torch.save(coco_evaluator.coco_eval["bbox"].eval,
-                                   output_dir / "eval" / name)
-
-    total_time = time.time() - start_time
-    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    print('Training time {}'.format(total_time_str))
 
 
 if __name__ == '__main__':

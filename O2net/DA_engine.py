@@ -26,7 +26,7 @@ import numpy as np
 import time
 import json
 from pathlib import Path
-
+import copy
 
 
 def box_to_mask(boxes, size):
@@ -278,22 +278,22 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         res = {target['image_id'].item(): output for target,
                output in zip(targets, results)} 
         
-        print(res)
-
-        output_dir = Path("/content/O2net_sg/O2net/test")
+        # 출력 경로와 파일 이름 설정
+        output_dir = Path("/content/drive/MyDrive/Cityscapes_data/data/l2_norm/exps/bbox")
         name_tag = "res_print"
 
-        res_for_json = res.copy()
+        # 원본 바뀌지 않게 깊은 복사. 얕은복사는 안됨.
+        res_for_json = copy.deepcopy(res)
      
-        for i in range(len(res_for_json)):
-            res_for_json[i]['scores'] = res_for_json[i]['scores'].cpu().numpy().tolist()
-            res_for_json[i]['labels'] = res_for_json[i]['labels'].cpu().numpy().tolist()
-            res_for_json[i]['boxes'] = res_for_json[i]['boxes'].cpu().numpy().tolist()
-            print(type(res_for_json[i]['boxes']))
-            print(res_for_json[i]['boxes'])
+        # 딕셔너리 안의 각각의 요소들을 텐서에서 변경
+        for item in res_for_json:
+            print(item)
+            res_for_json[item]['scores'] = res_for_json[item]['scores'].cpu().numpy().tolist()
+            res_for_json[item]['labels'] = res_for_json[item]['labels'].cpu().numpy().tolist()
+            res_for_json[item]['boxes'] = res_for_json[item]['boxes'].cpu().numpy().tolist()
        
 
-        with (output_dir / f"log_{name_tag}.json").open("a") as f:
+        with (output_dir / f"{name_tag}.json").open("a") as f:
             f.write(json.dumps(res_for_json) + "\n")
 
 
