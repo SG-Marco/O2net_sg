@@ -192,8 +192,6 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module, args,
         loss_value = losses_reduced_scaled.item()
 
         if not math.isfinite(loss_value):
-            print("Loss is {}, stopping training".format(loss_value))
-            print(loss_dict_reduced)
             sys.exit(1)
 
         optimizer.zero_grad()
@@ -219,12 +217,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module, args,
             samples_tgt, targets_tgt = prefetcher_tgt.next()
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir, name_tag):
     model.eval()
     criterion.eval()
 
@@ -280,14 +277,12 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         
         # 출력 경로와 파일 이름 설정
         output_dir = Path("/content/drive/MyDrive/Cityscapes_data/data/l2_norm/exps/bbox")
-        name_tag = "res_print"
 
         # 원본 바뀌지 않게 깊은 복사. 얕은복사는 안됨.
         res_for_json = copy.deepcopy(res)
      
         # 딕셔너리 안의 각각의 요소들을 텐서에서 변경
         for item in res_for_json:
-            print(item)
             res_for_json[item]['scores'] = res_for_json[item]['scores'].cpu().numpy().tolist()
             res_for_json[item]['labels'] = res_for_json[item]['labels'].cpu().numpy().tolist()
             res_for_json[item]['boxes'] = res_for_json[item]['boxes'].cpu().numpy().tolist()
@@ -314,7 +309,6 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
     if coco_evaluator is not None:
         coco_evaluator.synchronize_between_processes()
     if panoptic_evaluator is not None:
